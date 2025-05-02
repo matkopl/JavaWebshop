@@ -1,0 +1,20 @@
+package hr.algebra.webshop.dto;
+
+import hr.algebra.webshop.model.PaymentMethod;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class OrderDto {
+    private Long id;
+    private LocalDateTime orderDate;
+    private PaymentMethod paymentMethod;
+    private List<OrderItemDto> items;
+    private Long userId;
+}
