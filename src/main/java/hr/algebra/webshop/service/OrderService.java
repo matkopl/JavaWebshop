@@ -27,13 +27,13 @@ public class OrderService {
         order.setUser(user);
         order.setOrderDate(now());
         order.setPaymentMethod(placeOrderDto.getPaymentMethod());
-        
+
         List<CartItemDto> cartItems = cartService.getCartItems();
 
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("Cannot create order with empty cart");
         }
-        
+
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
 
@@ -53,12 +53,18 @@ public class OrderService {
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
 
-        Order savedOrder = orderRepository.save(order);
+        Payment payment = new Payment();
+        payment.setStatus(placeOrderDto.getPaymentMethod() == PaymentMethod.CASH_ON_DELIVERY ?
+                PaymentStatus.PENDING : PaymentStatus.COMPLETED);
+        payment.setOrder(order);
+        order.setPayment(payment);
 
+        Order savedOrder = orderRepository.save(order);
         cartService.clearCart();
 
         return toDto(savedOrder);
     }
+
 
     public List<OrderDto> getOrdersForUser(String userEmail) {
         return orderRepository.findByUserEmail(userEmail)

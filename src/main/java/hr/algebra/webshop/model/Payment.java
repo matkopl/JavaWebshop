@@ -15,10 +15,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String paymentId; // PayPal payment ID
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String payerId; // PayPal payer ID
 
     @OneToOne
@@ -27,6 +27,6 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status;
+    private PaymentStatus status = PaymentStatus.PENDING;
 }
 
