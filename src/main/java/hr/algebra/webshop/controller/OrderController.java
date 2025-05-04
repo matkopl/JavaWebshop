@@ -23,13 +23,13 @@ public class OrderController {
     public String getOrderById(@PathVariable Long id, Model model) {
         OrderDto orderDto = orderService.getOrderById(id);
         model.addAttribute("order", orderDto);
-        return "order-details";
+        return "order/order-details";
     }
 
     @GetMapping
     public String getAllOrders(Principal principal, Model model) {
         List<OrderDto> orders = orderService.getOrdersForUser(principal.getName());
         model.addAttribute("orders", orders);
-        return "orders";
+        return "order/orders";
     }
 }

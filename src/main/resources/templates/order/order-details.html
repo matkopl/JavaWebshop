@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalji narudžbe</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex; flex-direction: column;
+        }
+        .content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        .product-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+        .card .card-body dl.row dt,
+        .card .card-body dl.row dd {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+            font-size: 1rem;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-receipt me-2"></i>Detalji narudžbe #<span th:text="${order.id}"></span>
+            </h2>
+            <a href="/orders" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Povratak na popis
+            </a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-box-open me-2"></i>Proizvodi
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>Proizvod</th>
+                            <th class="text-end">Količina</th>
+                            <th class="text-end">Cijena</th>
+                            <th class="text-end">Ukupno</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${order.items}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <img th:src="@{${item.imageUrl}}"
+                                             class="product-img"
+                                             alt="Slika proizvoda"
+                                             th:attr="onerror='this.style.display=\'none\''">
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0" th:text="${item.productName}"></h6>
+                                        <small class="text-muted">ID: <span th:text="${item.productId}"></span></small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end" th:text="${item.quantity}"></td>
+                            <td class="text-end" th:text="${'€' + #numbers.formatDecimal(item.priceAtPurchase, 0, 'COMMA', 2, 'POINT')}"></td>
+                            <td class="text-end fw-bold"
+                                th:text="${'€' + #numbers.formatDecimal(item.priceAtPurchase * item.quantity, 0, 'COMMA', 2, 'POINT')}">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Informacije o narudžbi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-sm-5">Datum narudžbe:</dt>
+                            <dd class="col-sm-7" th:text="${#temporals.format(order.orderDate, 'dd.MM.yyyy. HH:mm')}"></dd>
+
+                            <dt class="col-sm-5">Način plaćanja:</dt>
+                            <dd class="col-sm-7">
+                                <span th:if="${order.paymentMethod.name() == T(hr.algebra.webshop.model.PaymentMethod).CASH_ON_DELIVERY.name()}">
+                                    <i class="fas fa-money-bill-wave me-1"></i>Gotovina - pouzeće
+                                </span>
+                                <span th:if="${order.paymentMethod.name() == T(hr.algebra.webshop.model.PaymentMethod).PAYPAL.name()}">
+                                    <i class="fab fa-paypal me-1"></i>PayPal
+                                </span>
+                            </dd>
+
+                            <dt class="col-sm-5">Status plaćanja:</dt>
+                            <dd class="col-sm-7">
+                                <span th:if="${order.paymentDetails?.status != null && order.paymentDetails.status.name() == T(hr.algebra.webshop.model.PaymentStatus).COMPLETED.name()}"
+                                      class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Plaćeno</span>
+                                <span th:if="${order.paymentDetails?.status != null && order.paymentDetails.status.name() == T(hr.algebra.webshop.model.PaymentStatus).PENDING.name()}"
+                                      class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i>Na čekanju</span>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-invoice-dollar me-2"></i>Sažetak plaćanja
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-6">Ukupna vrijednost:</dt>
+                            <dd class="col-sm-6" th:text="${'€' + #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')}"></dd>
+
+                            <dt class="col-sm-6" th:if="${order.paymentDetails?.paymentId}">PayPal ID transakcije:</dt>
+                            <dd class="col-sm-6" th:if="${order.paymentDetails?.paymentId}" th:text="${order.paymentDetails.paymentId}"></dd>
+
+                            <dt class="col-sm-6" th:if="${order.paymentDetails?.payerId}">PayPal ID kupca:</dt>
+                            <dd class="col-sm-6" th:if="${order.paymentDetails?.payerId}" th:text="${order.paymentDetails.payerId}"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            <div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+</body>
+</html>

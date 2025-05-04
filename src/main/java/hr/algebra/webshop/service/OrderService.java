@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.time.LocalDateTime.*;
 
@@ -66,8 +65,8 @@ public class OrderService {
     }
 
 
-    public List<OrderDto> getOrdersForUser(String userEmail) {
-        return orderRepository.findByUserEmail(userEmail)
+    public List<OrderDto> getOrdersForUser(String username) {
+        return orderRepository.findByUser_Username(username)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -136,7 +135,8 @@ public class OrderService {
                         item.getProduct().getId(),
                         item.getProduct().getName(),
                         item.getQuantity(),
-                        item.getPriceAtPurchase()))
+                        item.getPriceAtPurchase(),
+                        item.getProduct().getImageUrl()))
                 .toList();
 
         PaymentDetailsDto paymentDetails = null;

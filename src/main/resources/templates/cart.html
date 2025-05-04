@@ -18,8 +18,9 @@
     <div class="container mt-4">
         <h2>Vaša košarica</h2>
 
-        <div th:if="${#lists.isEmpty(cartItems)}">
-            <p>Košarica je prazna</p>
+        <div th:if="${#lists.isEmpty(cartItems)}" class="alert alert-info">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            Košarica je prazna.
         </div>
 
         <div th:unless="${#lists.isEmpty(cartItems)}">
