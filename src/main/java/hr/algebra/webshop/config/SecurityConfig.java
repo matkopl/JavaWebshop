@@ -1,6 +1,7 @@
 package hr.algebra.webshop.config;
 
 import hr.algebra.webshop.model.Role;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,25 +14,24 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/cart/checkout", "/orders/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(
-                                "/",
+                                "/", "/home",
                                 "/products/**",
                                 "/categories/**",
                                 "/cart/**",
-                                "/auth/login",
-                                "/auth/register",
+                                "/auth/**",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
-
-                        .requestMatchers("/checkout/**", "/orders/**").hasAuthority(Role.USER.toString())
-
-                        .requestMatchers("/admin/**").hasAuthority(Role.ADMIN.toString())
 
                         .anyRequest().authenticated()
                 )
@@ -40,18 +40,19 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
                         .failureUrl("/auth/login?error=true")
-                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .permitAll()
-                );
+                        .deleteCookies("JSESSIONID")
+                )
+                .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
+
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

@@ -28,20 +28,14 @@ public class ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Product with id: " + id + " not found"));
     }
 
-    public List<ProductDto> getFeaturedProducts() {
-        return productRepository.findTop8ByOrderByIdDesc()
-                .stream()
-                .map(this::toDto)
-                .toList();
-    }
-
     private ProductDto toDto(Product product) {
         return new ProductDto(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
-                product.getCategory().getId()
+                product.getCategory().getId(),
+                product.getImageUrl()
         );
     }
 }

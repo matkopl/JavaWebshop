@@ -5,9 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class CartItemDto {
+@AllArgsConstructor
+public class CartItemWithProductDto {
     private Long productId;
+    private ProductDto product;
     private Integer quantity;
+    private Double subtotal;
 }

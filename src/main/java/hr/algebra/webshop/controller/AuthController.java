@@ -2,7 +2,6 @@ package hr.algebra.webshop.controller;
 
 import hr.algebra.webshop.dto.LoginDto;
 import hr.algebra.webshop.dto.RegisterDto;
-import hr.algebra.webshop.dto.UserDto;
 import hr.algebra.webshop.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,13 +27,13 @@ public class AuthController {
         model.addAttribute("loginDto", new LoginDto());
         if (error) model.addAttribute("error", "Neispravno korisničko ime ili lozinka");
         if (logout) model.addAttribute("success", "Uspješno ste se odjavili");
-        return "login";
+        return "/auth/login";
     }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("registerDto", new RegisterDto());
-        return "register";
+        return "/auth/register";
     }
 
     @PostMapping("/register")
@@ -44,7 +43,7 @@ public class AuthController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            return "register";
+            return "/auth/register";
         }
 
         try {

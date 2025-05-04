@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Košarica</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        html, body { height: 100%; }
+        body { display: flex; flex-direction: column; }
+        .content { flex: 1 0 auto; }
+        footer { flex-shrink: 0; }
+        .quantity-input { width: 80px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <h2>Vaša košarica</h2>
+
+        <div th:if="${#lists.isEmpty(cartItems)}">
+            <p>Košarica je prazna</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(cartItems)}">
+            <div class="row mb-3 align-items-center" th:each="item, stat : ${cartItems}">
+                <div class="col-md-2">
+                    <img th:src="${item.product.imageUrl != null} ? @{${item.product.imageUrl}} : @{/images/placeholder.png}"
+                         alt="Slika proizvoda" class="img-fluid rounded">
+                </div>
+                <div class="col-md-6">
+                    <h5 th:text="${item.product.name}"></h5>
+                    <p th:text="${item.product.description}"></p>
+                    <p>Cijena: <span th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}"></span> €</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="number"
+                               th:id="'quantity_' + ${stat.index}"
+                               th:value="${item.quantity}"
+                               min="1"
+                               class="form-control form-control-sm quantity-input"
+                               th:attr="data-product-id=${item.productId}"
+                               th:onchange="'updateQuantity(' + ${stat.index} + ')'">
+                        <button class="btn btn-danger btn-sm"
+                                th:onclick="'removeFromCart(' + ${item.productId} + ')'">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <p class="mt-2 mb-0">
+                        Ukupno: <span th:id="'total_' + ${stat.index}"
+                                      th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}"></span> €
+                    </p>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-12 text-end">
+                    <h4>Ukupno: <span id="cartTotal" th:text="${#numbers.formatDecimal(total, 1, 2)}"></span> €</h4>
+                    <a th:href="@{/cart/checkout}" class="btn btn-success btn-lg">Checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<script>
+    function updateQuantity(index) {
+        const input = document.getElementById('quantity_' + index);
+        const productId = input.getAttribute('data-product-id');
+        const quantity = parseInt(input.value);
+
+        fetch(`/cart/update?productId=${productId}&quantity=${quantity}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Greška u mreži');
+                return response.json();
+            })
+            .then(data => {
+                if(data.itemRemoved) {
+                    location.reload();
+                } else {
+                    document.getElementById(`total_${index}`).textContent = data.subtotal.toFixed(2);
+                    document.getElementById('cartTotal').textContent = data.total.toFixed(2);
+                }
+            })
+            .catch(error => console.error('Greška:', error));
+    }
+
+    function removeFromCart(productId) {
+        fetch(`/cart/remove?productId=${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+            .then(response => {
+                if(response.ok) location.reload();
+                else console.error('Greška prilikom brisanja');
+            })
+            .catch(error => console.error('Greška:', error));
+    }
+</script>
+
+
+</body>
+</html>
