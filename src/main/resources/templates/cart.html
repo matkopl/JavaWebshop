@@ -24,7 +24,7 @@
         </div>
 
         <div th:unless="${#lists.isEmpty(cartItems)}">
-            <div class="row mb-3 align-items-center" th:each="item, stat : ${cartItems}">
+            <div class="row mb-3 align-items-center" th:each="item, stat : ${cartItems}" th:id="'cart-row-' + ${stat.index}">
                 <div class="col-md-2">
                     <img th:src="${item.product.imageUrl != null} ? @{${item.product.imageUrl}} : @{/images/placeholder.png}"
                          alt="Slika proizvoda" class="img-fluid rounded">
@@ -44,7 +44,7 @@
                                th:attr="data-product-id=${item.productId}"
                                th:onchange="'updateQuantity(' + ${stat.index} + ')'">
                         <button class="btn btn-danger btn-sm"
-                                th:onclick="'removeFromCart(' + ${item.productId} + ')'">
+                                th:onclick="'removeFromCart(' + ${item.productId} + ',' + ${stat.index} + ')'">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -65,6 +65,7 @@
     </div>
 </div>
 
+<div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/navbar :: scripts}"></div>
 
 <script>
@@ -92,16 +93,54 @@
             .catch(error => console.error('Greška:', error));
     }
 
-    function removeFromCart(productId) {
+    function removeFromCart(productId, index) {
+    console.log("Removing product:", productId, "at index:", index);
         fetch(`/cart/remove?productId=${productId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         })
-            .then(response => {
-                if(response.ok) location.reload();
-                else console.error('Greška prilikom brisanja');
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById('cart-row-' + index);
+                    if (row) row.remove();
+
+                    document.getElementById('cartTotal').textContent = data.total.toFixed(2);
+
+                    if (typeof updateCartBadge === "function") {
+                        updateCartBadge();
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Proizvod uspješno izbrisan!',
+                        showConfirmButton: false,
+                        timer: 1200,
+                        heightAuto: false
+                    });
+
+                    if (data.cartSize === 0) {
+                        const container = document.querySelector('.content .container');
+                        if (container) {
+                            container.innerHTML = '<h2>Vaša košarica</h2><p>Košarica je prazna</p>';
+                        }
+                    }
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Greška',
+                        text: 'Greška prilikom brisanja proizvoda!'
+                    });
+                }
             })
-            .catch(error => console.error('Greška:', error));
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Greška',
+                    text: 'Došlo je do pogreške pri komunikaciji sa serverom!'
+                });
+            });
     }
 </script>
 

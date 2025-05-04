@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderFilterDto {
-    private Long userId;
+    private String userEmail;
     private LocalDate startDate;
     private LocalDate endDate;
 }

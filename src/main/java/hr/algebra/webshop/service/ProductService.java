@@ -38,4 +38,11 @@ public class ProductService {
                 product.getImageUrl()
         );
     }
+
+    public List<ProductDto> getProductsByCategory(Long categoryId) {
+        return productRepository.findByCategoryId(categoryId)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 }

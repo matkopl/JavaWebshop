@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -22,13 +23,20 @@ public class HomeController {
     private final CartService cartService;
 
     @GetMapping({"/", "/home"})
-    public String home(Model model, HttpSession session) {
+    public String home(@RequestParam(required = false) Long categoryId, Model model) {
+
         List<CategoryDto> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
+        model.addAttribute("selectedCategoryId", categoryId);
 
-        List<ProductDto> products = productService.getAllProducts();
+        List<ProductDto> products;
+        if (categoryId != null) {
+            products = productService.getProductsByCategory(categoryId);
+        } else {
+            products = productService.getAllProducts();
+        }
+
         model.addAttribute("products", products);
-
         model.addAttribute("cartItems", cartService.getCartItems());
         return "home";
     }

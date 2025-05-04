@@ -13,4 +13,6 @@ import java.util.List;
 public class PlaceOrderDto {
     private PaymentMethod paymentMethod;
     private List<CartItemDto> cartItems;
+    private String paypalPaymentId;
+    private String paypalPayerId;
 }

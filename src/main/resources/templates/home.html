@@ -45,6 +45,37 @@
             <h2 class="mb-4"><i class="fas fa-star me-2"></i>Naši proizvodi</h2>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtriraj po kategoriji</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/}" class="btn btn-outline-primary"
+                               th:classappend="${selectedCategoryId == null} ? 'active'">
+                                <i class="fas fa-list-ul me-1"></i> Svi proizvodi
+                            </a>
+                            <a th:each="category : ${categories}"
+                               th:href="@{/(categoryId=${category.id})}"
+                               class="btn btn-outline-primary"
+                               th:classappend="${selectedCategoryId != null && selectedCategoryId == category.id} ? 'active'">
+                                <span th:text="${category.name}"></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" th:if="${products.empty}">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Nema proizvoda u odabranoj kategoriji.
+                </div>
+            </div>
+        </div>
+
         <div th:each="product : ${products}" class="col-12 col-md-6 col-lg-4 col-xl-3">
             <div class="card h-100 product-card shadow-sm">
                 <img th:src="${product.imageUrl != null} ? @{${product.imageUrl}} : @{/images/placeholder.png}"
@@ -89,7 +120,8 @@
                         icon: 'success',
                         title: 'Proizvod dodan u košaricu!',
                         showConfirmButton: false,
-                        timer: 1500
+                        timer: 1500,
+                        heightAuto: false
                     });
 
                     return fetch('/cart/size');

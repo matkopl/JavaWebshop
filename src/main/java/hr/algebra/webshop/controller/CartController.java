@@ -93,10 +93,25 @@ public class CartController {
 
     @PostMapping("/remove")
     @ResponseBody
-    public ResponseEntity<String> removeFromCart(@RequestParam Long productId) {
-       cartService.removeFromCart(productId);
-       return ResponseEntity.ok("Item removed from cart");
+    public Map<String, Object> removeFromCart(@RequestParam Long productId) {
+        cartService.removeFromCart(productId);
+
+        List<CartItemDto> cartItems = cartService.getCartItems();
+        int cartSize = cartItems.size();
+
+        double total = 0.0;
+        for (CartItemDto cartItem : cartItems) {
+            ProductDto product = productService.getProductById(cartItem.getProductId());
+            total += product.getPrice() * cartItem.getQuantity();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("cartSize", cartSize);
+        response.put("total", total);
+        return response;
     }
+
 
     @GetMapping("/checkout")
     public String checkout() {
