@@ -1,6 +1,5 @@
 package hr.algebra.webshop.config;
 
-import hr.algebra.webshop.model.Role;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,8 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/css/**",
                                 "/js/**",
-                                "/images/**"
+                                "/images/**",
+                                "/payment/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()

@@ -31,4 +31,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PaymentMethod paymentMethod;
+
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
+
+    @Column(nullable = false)
+    private Double totalAmount;
 }

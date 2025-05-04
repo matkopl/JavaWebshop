@@ -1,16 +1,21 @@
 package hr.algebra.webshop.controller;
 
-import hr.algebra.webshop.dto.CartItemDto;
-import hr.algebra.webshop.dto.CartItemWithProductDto;
-import hr.algebra.webshop.dto.ProductDto;
+import hr.algebra.webshop.dto.*;
+import hr.algebra.webshop.model.PaymentMethod;
+import hr.algebra.webshop.model.User;
 import hr.algebra.webshop.service.CartService;
+import hr.algebra.webshop.service.OrderService;
 import hr.algebra.webshop.service.ProductService;
+import hr.algebra.webshop.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +28,8 @@ public class CartController {
 
     private final CartService cartService;
     private final ProductService productService;
+    private final OrderService orderService;
+    private final UserService userService;
 
     @GetMapping
     public String viewCart(Model model) {
@@ -116,6 +123,35 @@ public class CartController {
     @GetMapping("/checkout")
     public String checkout() {
         return "checkout";
+    }
+
+    @PostMapping("/checkout")
+    public String processCheckout(@Valid PlaceOrderDto placeOrderDto, Principal principal, RedirectAttributes redirectAttributes) {
+        try {
+            if (cartService.getCartItems().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Košarica je prazna");
+                return "redirect:/cart";
+            }
+
+            User user = userService.findByUsername(principal.getName());
+
+            placeOrderDto.setCartItems(cartService.getCartItems());
+
+            if (placeOrderDto.getPaymentMethod() == PaymentMethod.PAYPAL) {
+                redirectAttributes.addFlashAttribute("orderId", orderService.createOrder(user, placeOrderDto).getId());
+                return "redirect:/payment/create";
+            } else {
+                OrderDto order = orderService.createOrder(user, placeOrderDto);
+
+                cartService.clearCart();
+
+                redirectAttributes.addFlashAttribute("success", "Narudžba uspješno izvršena! Plaćanje: Gotovina-pouzeće");
+                return "redirect:/orders/" + order.getId();
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Došlo je do greške: " + e.getMessage());
+            return "redirect:/cart/checkout";
+        }
     }
 
     @GetMapping("/size")

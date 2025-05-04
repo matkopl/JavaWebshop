@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Checkout</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <script src="https://www.paypalobjects.com/api/checkout.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        #paypal-button-container {
+            margin: 0 auto; max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <h2>Checkout</h2>
+
+        <form th:action="@{/cart/checkout}" method="post" id="checkoutForm">
+            <div class="mb-3">
+                <label class="form-label">Način plaćanja:</label>
+                <select name="paymentMethod" class="form-select" id="paymentMethod" required>
+                    <option value="CASH_ON_DELIVERY">Gotovina - pouzeće</option>
+                    <option value="PAYPAL">PayPal</option>
+                </select>
+            </div>
+
+            <!-- PayPal gumb -->
+            <div id="paypal-button-container" class="mb-3 d-none"></div>
+            <input type="hidden" name="paypalPaymentId" id="paypalPaymentId">
+            <input type="hidden" name="paypalPayerId" id="paypalPayerId">
+
+            <button type="submit" class="btn btn-success" id="submitButton">Završi kupnju</button>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<!-- SweetAlert notifikacije za flash atribute -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const success = /*[[${success}]]*/ null;
+        const error = /*[[${error}]]*/ null;
+
+        if (success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Uspješno!',
+                text: success,
+                showConfirmButton: false,
+                timer: 2000,
+                heightAuto: false
+            });
+        }
+
+        if (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Greška!',
+                text: error,
+                showConfirmButton: false,
+                timer: 3000,
+                heightAuto: false
+            });
+        }
+    });
+</script>
+
+<script>
+    const methodSelect = document.getElementById('paymentMethod');
+    const paypalContainer = document.getElementById('paypal-button-container');
+    const submitBtn = document.getElementById('submitButton');
+
+    methodSelect.addEventListener('change', () => {
+        const isPaypal = methodSelect.value === 'PAYPAL';
+        paypalContainer.classList.toggle('d-none', !isPaypal);
+        submitBtn.classList.toggle('d-none', isPaypal);
+    });
+
+    paypal.Button.render({
+        env: 'sandbox',
+        client: {
+            sandbox: 'AX3ZL5-ZcnGr_5lRxjVwtFfbwZ9M7I-lon7wWpJUksyAVNYPFD2ANHSbFI5nq-RLJyMW74YP7AFFF72A'
+        },
+        style: {
+            size: 'responsive',
+            color: 'gold',
+            shape: 'rect'
+        },
+        payment: function () {
+            return fetch('/payment/create', {
+                method: 'POST'
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.id) {
+                        return data.id;
+                    } else {
+                        throw new Error('Neuspjelo kreiranje plaćanja.');
+                    }
+                });
+        },
+        onAuthorize: function (data, actions) {
+            Swal.fire({
+                title: 'Obrada plaćanja',
+                text: 'Molimo pričekajte...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            return fetch('/payment/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `paymentId=${data.paymentID}&payerId=${data.payerID}`
+            })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Plaćanje uspješno!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            heightAuto: false
+                        }).then(() => {
+                            window.location.href = '/orders/' + response.orderId;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Greška',
+                            text: response.error || 'Došlo je do greške prilikom obrade plaćanja',
+                            heightAuto: false
+                        });
+                    }
+                });
+        },
+        onCancel: function (data) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Plaćanje otkazano',
+                showConfirmButton: false,
+                timer: 2000,
+                heightAuto: false
+            }).then(() => {
+                window.location.href = '/payment/cancel';
+            });
+        },
+        onError: function (err) {
+            Swal.fire({
+                icon: 'error',
+                title: 'PayPal greška',
+                text: 'Došlo je do greške tijekom PayPal plaćanja',
+                heightAuto: false
+            });
+        }
+    }, '#paypal-button-container');
+</script>
+
+</body>
+</html>

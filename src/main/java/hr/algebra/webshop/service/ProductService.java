@@ -45,4 +45,10 @@ public class ProductService {
                 .map(this::toDto)
                 .toList();
     }
+
+    public Product getProductEntity(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product with id: " + id + " not found"));
+    }
+
 }
