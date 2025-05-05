@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Povijest prijava</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container mt-4">
+    <h2>Povijest prijava</h2>
+
+    <form class="mb-4" th:action="@{/admin/login-history}">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="username" class="form-control" placeholder="Korisničko ime"
+                       th:value="${param.username}">
+            </div>
+            <div class="col-md-3">
+                <input type="datetime-local" name="start" class="form-control"
+                       th:value="${param.start}">
+            </div>
+            <div class="col-md-3">
+                <input type="datetime-local" name="end" class="form-control"
+                       th:value="${param.end}">
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Filtriraj</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Korisnik</th>
+            <th>Vrijeme prijave</th>
+            <th>IP adresa</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${loginHistoryDtos}">
+            <td th:text="${entry.username}"></td>
+            <td th:text="${#temporals.format(entry.loginTime, 'dd.MM.yyyy. HH:mm')}"></td>
+            <td th:text="${entry.ipAddress}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+</body>
+</html>

@@ -4,11 +4,21 @@
     <title>Košarica</title>
     <div th:replace="~{fragments/navbar :: styles}"></div>
     <style>
-        html, body { height: 100%; }
-        body { display: flex; flex-direction: column; }
-        .content { flex: 1 0 auto; }
-        footer { flex-shrink: 0; }
-        .quantity-input { width: 80px; }
+        html, body {
+            height: 100%;
+        }
+        body {
+            display: flex; flex-direction: column;
+        }
+        .content {
+            flex: 1 0 auto;
+        }
+        footer {
+            flex-shrink: 0;
+        }
+        .quantity-input {
+            width: 80px;
+        }
     </style>
 </head>
 <body>
@@ -122,7 +132,10 @@
                     if (data.cartSize === 0) {
                         const container = document.querySelector('.content .container');
                         if (container) {
-                            container.innerHTML = '<h2>Vaša košarica</h2><p>Košarica je prazna</p>';
+                            container.innerHTML = '<h2>Vaša košarica</h2><div class="alert alert-info">\n' +
+                                '            <i class="fas fa-exclamation-circle me-2"></i>\n' +
+                                '            Košarica je prazna.\n' +
+                                '        </div>';
                         }
                     }
 
