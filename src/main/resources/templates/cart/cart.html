@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Košarica</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .product-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #0d6efd;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .quantity-input {
+            width: 90px;
+        }
+        .total-price {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <h2 class="mb-4">
+            <i class="fas fa-shopping-basket me-2"></i>Vaša košarica
+        </h2>
+
+        <div th:if="${#lists.isEmpty(cartItems)}" class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Vaša košarica je prazna</h4>
+                <a th:href="@{/}" class="btn btn-primary mt-3">
+                    <i class="fas fa-arrow-left me-2"></i>Nastavite s kupnjom
+                </a>
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(cartItems)}">
+            <div class="card mb-3 product-card" th:each="item, stat : ${cartItems}" th:id="'cart-row-' + ${stat.index}">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img th:src="${item.product.imageUrl != null} ? @{${item.product.imageUrl}} : @{/images/placeholder.png}"
+                                 alt="Slika proizvoda"
+                                 class="img-fluid rounded"
+                                 style="max-height: 100px;">
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-1">
+                                <i class="fas fa-tag me-2 text-primary"></i>
+                                <span th:text="${item.product.name}"></span>
+                            </h5>
+                            <p class="text-muted mb-1" th:text="${item.product.description}"></p>
+                            <p class="mb-0">
+                                <i class="fas fa-euro-sign me-1"></i>
+                                <span th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}"></span> po komadu
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                    <input type="number"
+                                           th:id="'quantity_' + ${stat.index}"
+                                           th:value="${item.quantity}"
+                                           min="1"
+                                           class="form-control quantity-input"
+                                           th:attr="data-product-id=${item.productId}"
+                                           th:onchange="'updateQuantity(' + ${stat.index} + ')'">
+                                </div>
+                                <button class="btn btn-danger rounded-circle"
+                                        th:onclick="'removeFromCart(' + ${item.productId} + ',' + ${stat.index} + ')'">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <p class="mb-0 fw-bold">
+                                <i class="fas fa-calculator me-2"></i>
+                                Ukupno: <span th:id="'total_' + ${stat.index}"
+                                              th:text="${#numbers.formatDecimal(item.subtotal, 1, 2)}"></span> €
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-lg border-primary">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h4 class="mb-0">
+                                <i class="fas fa-receipt me-2"></i>
+                                Ukupan iznos:
+                            </h4>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h2 class="total-price mb-0">
+                                <span id="cartTotal" th:text="${#numbers.formatDecimal(total, 1, 2)}"></span> €
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <a th:href="@{/cart/checkout}" class="btn btn-success btn-lg py-3">
+                    <i class="fas fa-credit-card me-2"></i>Završi kupnju
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<script>
+    function updateQuantity(index) {
+        const input = document.getElementById('quantity_' + index);
+        const productId = input.getAttribute('data-product-id');
+        const quantity = parseInt(input.value);
+
+        fetch(`/cart/update?productId=${productId}&quantity=${quantity}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('Greška u mreži');
+                return response.json();
+            })
+            .then(data => {
+                if(data.itemRemoved) {
+                    location.reload();
+                } else {
+                    document.getElementById(`total_${index}`).textContent = data.subtotal.toFixed(2);
+                    document.getElementById('cartTotal').textContent = data.total.toFixed(2);
+                }
+            })
+            .catch(error => console.error('Greška:', error));
+    }
+
+    function removeFromCart(productId, index) {
+    console.log("Removing product:", productId, "at index:", index);
+        fetch(`/cart/remove?productId=${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById('cart-row-' + index);
+                    if (row) row.remove();
+
+                    document.getElementById('cartTotal').textContent = data.total.toFixed(2);
+
+                    if (typeof updateCartBadge === "function") {
+                        updateCartBadge();
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Proizvod uspješno izbrisan!',
+                        showConfirmButton: false,
+                        timer: 1200,
+                        heightAuto: false
+                    });
+
+                    if (data.cartSize === 0) {
+                        const container = document.querySelector('.content .container');
+                        if (container) {
+                            container.innerHTML = '<h2>Vaša košarica</h2><div class="alert alert-info">\n' +
+                                '            <i class="fas fa-exclamation-circle me-2"></i>\n' +
+                                '            Košarica je prazna.\n' +
+                                '        </div>';
+                        }
+                    }
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Greška',
+                        text: 'Greška prilikom brisanja proizvoda!'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Greška',
+                    text: 'Došlo je do pogreške pri komunikaciji sa serverom!'
+                });
+            });
+    }
+</script>
+
+
+</body>
+</html>

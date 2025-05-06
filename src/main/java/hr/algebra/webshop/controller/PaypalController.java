@@ -1,7 +1,6 @@
 package hr.algebra.webshop.controller;
 
 import com.paypal.api.payments.Payment;
-import com.paypal.base.rest.PayPalRESTException;
 import hr.algebra.webshop.model.Order;
 import hr.algebra.webshop.model.PaymentMethod;
 import hr.algebra.webshop.model.User;
@@ -12,8 +11,6 @@ import hr.algebra.webshop.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -31,7 +28,6 @@ public class PaypalController {
     private final UserService userService;
     private final CartService cartService;
 
-    // PaypalController.java
     @PostMapping("/create")
     @ResponseBody
     public ResponseEntity<Map<String, String>> createPayment(Principal principal) {
@@ -43,7 +39,7 @@ public class PaypalController {
             Payment payment = paypalService.createPayment(
                     total,
                     "EUR",
-                    "http://localhost:8080/payment/complete", // Promijenjen URL
+                    "http://localhost:8080/payment/complete",
                     "http://localhost:8080/payment/cancel"
             );
 
@@ -56,8 +52,8 @@ public class PaypalController {
     }
 
     @PostMapping("/complete")
-    @ResponseBody
     @Transactional
+    @ResponseBody
     public Map<String, Object> completePayment(
             @RequestParam String paymentId,
             @RequestParam String payerId,

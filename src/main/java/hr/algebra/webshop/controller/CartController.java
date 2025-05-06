@@ -53,7 +53,7 @@ public class CartController {
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("total", totalPrice);
 
-        return "cart";
+        return "cart/cart";
     }
 
     @PostMapping("/add")
@@ -122,7 +122,7 @@ public class CartController {
 
     @GetMapping("/checkout")
     public String checkout() {
-        return "checkout";
+        return "cart/checkout";
     }
 
     @PostMapping("/checkout")

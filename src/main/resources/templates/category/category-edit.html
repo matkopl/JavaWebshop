@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Uredi kategoriju</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .edit-card { border-left: 4px solid #0d6efd; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <div class="card shadow-lg edit-card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Uredi kategoriju</h4>
+            </div>
+
+            <div class="card-body">
+                <form th:action="@{/categories/update/{id}(id=${category.id})}"
+                      th:object="${category}"
+                      method="post">
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-tag me-2"></i>Naziv kategorije</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                            <input type="text" class="form-control"
+                                   th:field="*{name}"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/categories}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Odustani
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Spremi promjene
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+</body>
+</html>

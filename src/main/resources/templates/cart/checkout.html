@@ -5,22 +5,16 @@
     <div th:replace="~{fragments/navbar :: styles}"></div>
     <script src="https://www.paypalobjects.com/api/checkout.js"></script>
     <style>
-        html, body {
-            height: 100%;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .content {
-            flex: 1 0 auto;
-        }
-        footer {
-            flex-shrink: 0;
+        .checkout-card {
+            border-left: 4px solid #0d6efd;
+            max-width: 800px;
+            margin: 0 auto;
         }
         #paypal-button-container {
-            margin: 0 auto; max-width: 500px;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
         }
     </style>
 </head>
@@ -29,31 +23,50 @@
 
 <div class="content">
     <div class="container mt-4">
-        <h2>Checkout</h2>
-
-        <form th:action="@{/cart/checkout}" method="post" id="checkoutForm">
-            <div class="mb-3">
-                <label class="form-label">Način plaćanja:</label>
-                <select name="paymentMethod" class="form-select" id="paymentMethod" required>
-                    <option value="CASH_ON_DELIVERY">Gotovina - pouzeće</option>
-                    <option value="PAYPAL">PayPal</option>
-                </select>
+        <div class="checkout-card card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-credit-card me-2"></i>Završite kupnju</h4>
             </div>
 
-            <!-- PayPal gumb -->
-            <div id="paypal-button-container" class="mb-3 d-none"></div>
-            <input type="hidden" name="paypalPaymentId" id="paypalPaymentId">
-            <input type="hidden" name="paypalPayerId" id="paypalPayerId">
+            <div class="card-body">
+                <form th:action="@{/cart/checkout}" method="post" id="checkoutForm">
+                    <div class="mb-4">
+                        <label class="form-label h5">
+                            <i class="fas fa-money-bill-wave me-2"></i>Odaberite način plaćanja:
+                        </label>
+                        <select name="paymentMethod"
+                                class="form-select form-select-lg"
+                                id="paymentMethod"
+                                required>
+                            <option value="CASH_ON_DELIVERY">
+                                <i class="fas fa-money-bill me-2"></i>Gotovina - pouzeće
+                            </option>
+                            <option value="PAYPAL">
+                                <i class="fab fa-paypal me-2"></i>PayPal
+                            </option>
+                        </select>
+                    </div>
 
-            <button type="submit" class="btn btn-success" id="submitButton">Završi kupnju</button>
-        </form>
+                    <div id="paypal-button-container" class="d-none"></div>
+                    <input type="hidden" name="paypalPaymentId" id="paypalPaymentId">
+                    <input type="hidden" name="paypalPayerId" id="paypalPayerId">
+
+                    <div class="d-grid gap-2">
+                        <button type="submit"
+                                class="btn btn-success btn-lg py-3"
+                                id="submitButton">
+                            <i class="fas fa-check-circle me-2"></i>Potvrdi kupnju
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/navbar :: scripts}"></div>
 
-<!-- SweetAlert notifikacije za flash atribute -->
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function() {
         const success = /*[[${success}]]*/ null;
@@ -118,15 +131,6 @@
                 });
         },
         onAuthorize: function (data, actions) {
-            Swal.fire({
-                title: 'Obrada plaćanja',
-                text: 'Molimo pričekajte...',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
             return fetch('/payment/complete', {
                 method: 'POST',
                 headers: {

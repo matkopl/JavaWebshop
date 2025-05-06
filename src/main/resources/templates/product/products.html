@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upravljanje proizvodima</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .product-card { border-left: 4px solid #0d6efd; }
+        .product-card:hover { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); }
+        .product-image { max-width: 100px; height: auto; }
+        .action-buttons { min-width: 200px; }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <h2 class="mb-4">
+            <i class="fas fa-box me-2"></i>Upravljanje proizvodima
+        </h2>
+
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <i class="fas fa-plus-circle me-2"></i>Dodaj novi proizvod
+            </div>
+            <div class="card-body">
+                <form th:action="@{/products/save}" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                <input type="text" class="form-control"
+                                       placeholder="Naziv proizvoda"
+                                       th:field="*{newProduct.name}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                                <input type="number" step="0.01" class="form-control"
+                                       placeholder="Cijena"
+                                       th:field="*{newProduct.price}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                                <select class="form-select" th:field="*{newProduct.categoryId}">
+                                    <option value="">Odaberi kategoriju</option>
+                                    <option th:each="category : ${allCategories}"
+                                            th:value="${category.id}"
+                                            th:text="${category.name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-plus me-2"></i>Dodaj proizvod
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(products)}" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Nema dostupnih proizvoda
+        </div>
+
+        <div th:each="product : ${products}" class="card mb-3 product-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <img th:src="${product.imageUrl}"
+                             class="product-image rounded"
+                             alt="Slika proizvoda">
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-2">
+                            <i class="fas fa-tag me-2"></i>
+                            <span th:text="${product.name}"></span>
+                        </h5>
+                        <p class="text-muted" th:text="${product.description}"></p>
+                        <p class="mb-0">
+                            <i class="fas fa-euro-sign me-1"></i>
+                            <span th:text="${#numbers.formatDecimal(product.price, 1, 2)}"></span>
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end action-buttons">
+                        <a th:href="@{'/products/edit/' + ${product.id}}"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Uredi
+                        </a>
+                        <a th:href="@{'/products/delete/' + ${product.id}}"
+                           class="btn btn-outline-danger btn-sm"
+                           onclick="return confirmDelete(event)">
+                            <i class="fas fa-trash me-1"></i>Obriši
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const successMessage = /*[[${successMessage}]]*/ null;
+    const errorMessage = /*[[${errorMessage}]]*/ null;
+
+    if (successMessage) {
+        Swal.fire({
+            icon: 'success',
+            title: successMessage,
+            showConfirmButton: false,
+            timer: 1500,
+            heightAuto: false
+        });
+    }
+
+    if (errorMessage) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Greška',
+            text: errorMessage,
+            heightAuto: false
+        });
+    }
+    /*]]>*/
+</script>
+<script>
+    function confirmDelete(event) {
+        event.preventDefault();
+        const url = event.currentTarget.href;
+
+        Swal.fire({
+            title: 'Je

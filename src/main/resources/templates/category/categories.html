@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Upravljanje kategorijama</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .action-buttons { min-width: 200px; }
+        .category-card { border-left: 4px solid #0d6efd; }
+        .category-card:hover { box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container mt-4">
+        <h2 class="mb-4">
+            <i class="fas fa-tags me-2"></i>Upravljanje kategorijama
+        </h2>
+
+        <!-- Forma za dodavanje nove kategorije -->
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <i class="fas fa-plus-circle me-2"></i>Dodaj novu kategoriju
+            </div>
+            <div class="card-body">
+                <form th:action="@{/categories/save}" method="post">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                <input type="text" class="form-control"
+                                       placeholder="Unesi naziv nove kategorije"
+                                       th:field="*{newCategory.name}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-plus me-2"></i>Dodaj kategoriju
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista kategorija -->
+        <div th:if="${#lists.isEmpty(categories)}" class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Nema dostupnih kategorija
+        </div>
+
+        <div th:each="category : ${categories}" class="card mb-3 category-card">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tag me-2"></i>
+                            <span th:text="${category.name}"></span>
+                        </h5>
+                    </div>
+                    <div class="col-md-4 text-end action-buttons">
+                        <a th:href="@{'/categories/edit/' + ${category.id}}"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Uredi
+                        </a>
+                        <a th:href="@{'/categories/delete/' + ${category.id}}"
+                           class="btn btn-outline-danger btn-sm"
+                           onclick="return confirmDelete(event)">
+                            <i class="fas fa-trash me-1"></i>Obriši
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const successMessage = /*[[${successMessage}]]*/ null;
+    const errorMessage = /*[[${errorMessage}]]*/ null;
+
+    if (successMessage) {
+        Swal.fire({
+            icon: 'success',
+            title: successMessage,
+            showConfirmButton: false,
+            timer: 1500,
+            heightAuto: false
+        });
+    }
+
+    if (errorMessage) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Greška',
+            text: errorMessage,
+            heightAuto: false
+        });
+    }
+    /*]]>*/
+</script>
+<script>
+    function confirmDelete(event) {
+        event.preventDefault();
+        const url = event.currentTarget.href;
+
+        Swal.fire({
+            title: 'Jeste li sigurni?',
+            text: "Ova radnja se ne može poništiti!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Da, obriši!',
+            cancelButtonText: 'Odustani',
+            heightAuto: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+</script>
+</body>
+</html>

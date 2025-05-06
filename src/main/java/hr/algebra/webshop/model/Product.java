@@ -20,7 +20,7 @@ public class Product {
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

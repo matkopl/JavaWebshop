@@ -28,6 +28,27 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Category with id: " + id + " not found"));
     }
 
+    public void saveCategory(CategoryDto categoryDto) {
+        Category category = new Category();
+        category.setName(categoryDto.getName());
+        categoryRepository.save(category);
+    }
+
+    public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+        category.setName(categoryDto.getName());
+        categoryRepository.save(category);
+        return toDto(category);
+    }
+
+    public void deleteCategory(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new EntityNotFoundException("Category not found");
+        }
+        categoryRepository.deleteById(id);
+    }
+
     private CategoryDto toDto(Category category) {
         return new CategoryDto(
                 category.getId(),

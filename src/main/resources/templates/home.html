@@ -1,6 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>WebShop</title>
     <meta charset="UTF-8">
@@ -8,18 +7,6 @@
 
     <div th:replace="~{fragments/navbar :: styles}"></div>
     <style>
-        html, body {
-            height: 100%;
-        }
-        body {
-            display: flex; flex-direction: column;
-        }
-        .content {
-            flex: 1 0 auto;
-        }
-        footer {
-            flex-shrink: 0;
-        }
         .product-card {
             transition: transform 0.2s;
         }

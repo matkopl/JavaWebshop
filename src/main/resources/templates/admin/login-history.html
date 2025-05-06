@@ -3,51 +3,92 @@
 <head>
     <title>Povijest prijava</title>
     <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .filter-card {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .filter-icon {
+            color: #0d6efd;
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+        }
+        .table-icon {
+            margin-right: 0.5rem;
+        }
+        .login-history-card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
 <body>
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="container mt-4">
-    <h2>Povijest prijava</h2>
+<div class="content">
+    <div class="container mt-4">
+        <h2 class="mb-4">
+            <i class="fas fa-history me-2"></i>Povijest prijava
+        </h2>
 
-    <form class="mb-4" th:action="@{/admin/login-history}">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <input type="text" name="username" class="form-control" placeholder="Korisničko ime"
-                       th:value="${param.username}">
-            </div>
-            <div class="col-md-3">
-                <input type="datetime-local" name="start" class="form-control"
-                       th:value="${param.start}">
-            </div>
-            <div class="col-md-3">
-                <input type="datetime-local" name="end" class="form-control"
-                       th:value="${param.end}">
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">Filtriraj</button>
+        <div class="card filter-card mb-4 login-history-card">
+            <form th:action="@{/admin/login-history}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user filter-icon"></i></span>
+                            <input type="text" name="username" class="form-control" placeholder="Korisničko ime"
+                                   th:value="${param.username}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar filter-icon"></i></span>
+                            <input type="datetime-local" name="start" class="form-control"
+                                   th:value="${param.start}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar filter-icon"></i></span>
+                            <input type="datetime-local" name="end" class="form-control"
+                                   th:value="${param.end}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Filtriraj
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="card login-history-card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th><i class="fas fa-user table-icon"></i>Korisnik</th>
+                            <th><i class="fas fa-clock table-icon"></i>Vrijeme prijave</th>
+                            <th><i class="fas fa-network-wired table-icon"></i>IP adresa</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="entry : ${loginHistoryDtos}">
+                            <td th:text="${entry.username}"></td>
+                            <td th:text="${#temporals.format(entry.loginTime, 'dd.MM.yyyy. HH:mm')}"></td>
+                            <td th:text="${entry.ipAddress}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </form>
-
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th>Korisnik</th>
-            <th>Vrijeme prijave</th>
-            <th>IP adresa</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="entry : ${loginHistoryDtos}">
-            <td th:text="${entry.username}"></td>
-            <td th:text="${#temporals.format(entry.loginTime, 'dd.MM.yyyy. HH:mm')}"></td>
-            <td th:text="${entry.ipAddress}"></td>
-        </tr>
-        </tbody>
-    </table>
+    </div>
 </div>
-
 <div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/navbar :: scripts}"></div>
 </body>
