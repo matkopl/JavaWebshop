@@ -16,10 +16,10 @@ public class Payment {
     private Long id;
 
     @Column(nullable = true, unique = true)
-    private String paymentId; // PayPal payment ID
+    private String paymentId;
 
     @Column(nullable = true)
-    private String payerId; // PayPal payer ID
+    private String payerId;
 
     @OneToOne
     @JoinColumn(name = "order_id", nullable = false)

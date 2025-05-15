@@ -174,9 +174,18 @@
                     if (data.cartSize === 0) {
                         const container = document.querySelector('.content .container');
                         if (container) {
-                            container.innerHTML = '<h2>Vaša košarica</h2><div class="alert alert-info">\n' +
-                                '            <i class="fas fa-exclamation-circle me-2"></i>\n' +
-                                '            Košarica je prazna.\n' +
+                            container.innerHTML = '<h2 class="mb-4">\n' +
+                                '            <i class="fas fa-shopping-basket me-2"></i>Vaša košarica\n' +
+                                '        </h2>\n' +
+                                '\n' +
+                                '        <div th:if="${#lists.isEmpty(cartItems)}" class="card">\n' +
+                                '            <div class="card-body text-center py-5">\n' +
+                                '                <i class="fas fa-shopping-basket fa-4x text-muted mb-3"></i>\n' +
+                                '                <h4 class="text-muted">Vaša košarica je prazna</h4>\n' +
+                                '                <a href="/" class="btn btn-primary mt-3">\n' +
+                                '                    <i class="fas fa-arrow-left me-2"></i>Nastavite s kupnjom\n' +
+                                '                </a>\n' +
+                                '            </div>\n' +
                                 '        </div>';
                         }
                     }
