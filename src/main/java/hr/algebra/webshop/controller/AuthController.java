@@ -27,13 +27,13 @@ public class AuthController {
         model.addAttribute("loginDto", new LoginDto());
         if (error) model.addAttribute("error", "Neispravno korisničko ime ili lozinka");
         if (logout) model.addAttribute("success", "Uspješno ste se odjavili");
-        return "/auth/login";
+        return "auth/login";
     }
 
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("registerDto", new RegisterDto());
-        return "/auth/register";
+        return "auth/register";
     }
 
     @PostMapping("/register")
@@ -43,16 +43,16 @@ public class AuthController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            return "/auth/register";
+            return "auth/register";
         }
 
         try {
             authService.register(registerDto);
             redirectAttributes.addFlashAttribute("success", "Registracija uspješna!");
-            return "redirect:/auth/login";
+            return "redirect:auth/login";
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
-            return "redirect:/auth/register";
+            return "redirect:auth/register";
         }
     }
 }

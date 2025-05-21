@@ -12,7 +12,7 @@ import java.util.Set;
 @Component
 public class BlockedIpFilter implements Filter {
     private static final Logger logger = org.slf4j.LoggerFactory.getLogger(BlockedIpFilter.class);
-    private static final Set<String> BLOCKED_IPS = Set.of("127.0.0.1", "0:0:0:0:0:0:0:1");
+    private static final Set<String> BLOCKED_IPS = Set.of(); //"127.0.0.1", "0:0:0:0:0:0:0:1"
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
