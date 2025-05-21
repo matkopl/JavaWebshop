@@ -29,7 +29,7 @@
                 <i class="fas fa-receipt me-2"></i>Detalji narudžbe #<span th:text="${order.id}"></span>
             </h2>
             <a href="/orders" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i>Povratak na popis
+                <i class="fas fa-arrow-left me-1"></i>Povratak na moje narudžbe
             </a>
         </div>
 
@@ -55,8 +55,8 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
-                                        <img th:src="@{${item.imageUrl}}"
-                                             class="product-img"
+                                        <img th:src="${(item.imageUrl != null and item.imageUrl != '')} ? ${item.imageUrl} : @{/images/placeholder.jpg}"
+                                             class="product-img card-img-top"
                                              alt="Slika proizvoda"
                                              th:attr="onerror='this.style.display=\'none\''">
                                     </div>

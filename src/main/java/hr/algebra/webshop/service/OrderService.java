@@ -78,6 +78,13 @@ public class OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order with id: " + id + " not found"));
     }
 
+    public List<OrderDto> getFilteredOrders(String username, LocalDateTime start, LocalDateTime end) {
+        return orderRepository.findFiltered(username, start, end)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     public List<OrderDto> getAllOrders() {
         return orderRepository.findAll()
                 .stream()
@@ -85,14 +92,14 @@ public class OrderService {
                 .toList();
     }
 
-    public Order createOrderFromCart(String username, PaymentMethod paymentMethod) { // Return Order entity instead of DTO
+    public Order createOrderFromCart(String username, PaymentMethod paymentMethod) {
         User user = userService.findByUsername(username);
 
         PlaceOrderDto placeOrderDto = new PlaceOrderDto();
         placeOrderDto.setPaymentMethod(paymentMethod);
         placeOrderDto.setCartItems(cartService.getCartItems());
 
-        return orderRepository.save(createOrderEntity(user, placeOrderDto)); // Save and return the entity
+        return orderRepository.save(createOrderEntity(user, placeOrderDto));
     }
 
     private Order createOrderEntity(User user, PlaceOrderDto placeOrderDto) {

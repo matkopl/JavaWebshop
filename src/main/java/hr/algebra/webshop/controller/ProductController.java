@@ -1,6 +1,7 @@
 package hr.algebra.webshop.controller;
 
 import hr.algebra.webshop.dto.ProductDto;
+import hr.algebra.webshop.model.Product;
 import hr.algebra.webshop.service.CategoryService;
 import hr.algebra.webshop.service.ProductService;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/products")
@@ -25,6 +28,21 @@ public class ProductController {
         model.addAttribute("allCategories", categoryService.getAllCategories());
         return "product/products";
     }
+
+    @GetMapping("/{id}")
+    public String getProductDetails(@PathVariable Long id, Model model) {
+        ProductDto productDto = productService.getProductById(id);
+        List<ProductDto> relatedProducts = productService.getProductsByCategory(productDto.getCategoryId())
+                .stream()
+                .filter(p -> !p.getId().equals(id))
+                .limit(4)
+                .toList();
+
+        model.addAttribute("product", productDto);
+        model.addAttribute("relatedProducts", relatedProducts);
+        return "product/product-details";
+    }
+
 
     @PostMapping("/save")
     public String saveProduct(@ModelAttribute("newProduct") ProductDto productDto,

@@ -14,11 +14,12 @@ import java.util.List;
 public class LoginHistoryService {
     private final LoginHistoryRepository loginHistoryRepository;
 
-    public void logLogin(String username, String ipAddress) {
+    public void logLogin(String username, String ipAddress, String status) {
         LoginHistory loginHistory = new LoginHistory();
         loginHistory.setUsername(username);
         loginHistory.setIpAddress(ipAddress);
         loginHistory.setLoginTime(LocalDateTime.now());
+        loginHistory.setStatus(status);
         loginHistoryRepository.save(loginHistory);
     }
 
@@ -40,7 +41,8 @@ public class LoginHistoryService {
         return new LoginHistoryDto(
                 loginHistory.getUsername(),
                 loginHistory.getLoginTime(),
-                loginHistory.getIpAddress()
+                loginHistory.getIpAddress(),
+                loginHistory.getStatus()
         );
     }
 }

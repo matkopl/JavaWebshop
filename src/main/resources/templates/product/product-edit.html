@@ -29,8 +29,8 @@
 
                     <div class="row g-3">
                         <div class="col-md-4 text-center">
-                            <img th:src="${product.imageUrl}"
-                                 class="product-image-preview mb-3"
+                            <img th:src="${(product.imageUrl != null and product.imageUrl != '')} ? ${product.imageUrl} : @{/images/placeholder.jpg}"
+                                 class="product-img card-img-top"
                                  alt="Slika proizvoda">
                         </div>
 

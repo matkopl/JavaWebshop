@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalji proizvoda</title>
+    <div th:replace="~{fragments/navbar :: styles}"></div>
+    <style>
+        .product-gallery {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .product-info-card {
+            border-left: 4px solid #0d6efd;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+        .related-products .card {
+            transition: transform 0.2s;
+        }
+        .related-products .card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="content">
+    <div class="container py-5">
+        <!-- Glavni sadržaj -->
+        <div class="row g-4">
+            <!-- Slika proizvoda -->
+            <div class="col-md-6">
+                <div class="product-gallery card h-100 border-0">
+                    <img th:src="${(product.imageUrl != null and product.imageUrl != '')} ? ${product.imageUrl} : @{/images/placeholder.jpg}"
+                         class="product-image-preview mb-3"
+                         alt="Slika proizvoda">
+                </div>
+            </div>
+
+            <!-- Informacije o proizvodu -->
+            <div class="col-md-6">
+                <div class="product-info-card card h-100 p-4">
+                    <div class="card-body">
+                        <h1 class="mb-3" th:text="${product.name}"></h1>
+
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <h2 class="text-primary mb-0">
+                                <span th:text="${'€ ' + #numbers.formatDecimal(product.price, 1, 2)}"></span>
+                            </h2>
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-tag me-2"></i>
+                                <span th:text="${product.categoryName}"></span>
+                            </span>
+                        </div>
+
+                        <p class="text-muted lead mb-4" th:text="${product.description}"></p>
+
+                        <div class="d-grid gap-3">
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="updateQuantity(-1)">-</button>
+                                <input type="number" id="quantity"
+                                       class="form-control text-center"
+                                       value="1" min="1" style="max-width: 80px">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="updateQuantity(1)">+</button>
+                            </div>
+
+                            <button class="btn btn-primary btn-lg py-3"
+                                    th:onclick="'addToCart(' + ${product.id} + ', document.getElementById(\'quantity\').value)'">
+                                <i class="fas fa-cart-plus me-2"></i>Dodaj u košaricu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Povezani proizvodi -->
+        <div class="row mt-5" th:if="${not #lists.isEmpty(relatedProducts)}">
+            <div class="col-12">
+                <h4 class="mb-4"><i class="fas fa-random me-2"></i>Slični proizvodi</h4>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 related-products">
+                    <div th:each="relatedProduct : ${relatedProducts}" class="col">
+                        <div class="card h-100 shadow-sm">
+                            <img th:src="${(relatedProduct.imageUrl != null and relatedProduct.imageUrl != '')} ? ${relatedProduct.imageUrl} : @{/images/placeholder.jpg}"
+                                 class="product-image-preview mb-3"
+                                 alt="Slika proizvoda">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title" th:text="${relatedProduct.name}"></h5>
+                                <p class="card-text text-muted" th:text="${relatedProduct.description}"></p>
+                                <div class="mt-auto">
+                                    <p class="h5 text-primary mb-3"
+                                       th:text="${'€ ' + #numbers.formatDecimal(relatedProduct.price, 1, 2)}"></p>
+                                    <a th:href="@{/products/{id}(id=${relatedProduct.id})}"
+                                       class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-info-circle me-2"></i>Detalji
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Skripte -->
+<div th:replace="~{fragments/navbar :: scripts}"></div>
+
+<script th:inline="javascript">
+    function updateQuantity(change) {
+        const input = document.getElementById('quantity');
+        let value = parseInt(input.value) + change;
+        input.value = Math.max(value, 1);
+    }
+
+    function addToCart(productId, quantity) {
+        fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `productId=${productId}&quantity=${quantity}`
+        })
+            .then(response => {
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Proizvod dodan u košaricu!',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        heightAuto: false
+                    });
+                    return fetch('/cart/size');
+                }
+                throw new Error('Greška');
+            })
+            .then(response => response.json())
+            .then(cartSize => updateCartBadge(cartSize))
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Greška',
+                    text: 'Došlo je do pogreške prilikom komunikacije sa serverom!'
+                });
+            });
+    }
+
+    function updateCartBadge(cartSize) {
+        const cartLink = document.querySelector('a[href="/cart"]');
+        let badge = cartLink.querySelector('.badge');
+
+        if (cartSize > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'badge bg-danger ms-1';
+                cartLink.appendChild(badge);
+            }
+            badge.textContent = cartSize;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+</script>
+
+</body>
+</html>

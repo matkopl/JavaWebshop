@@ -8,30 +8,70 @@
     <div th:replace="~{fragments/navbar :: styles}"></div>
     <style>
         .product-card {
-            transition: transform 0.2s;
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.07);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-7px) scale(1.01);
+            box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.12);
+        }
+        .product-img {
+            height: 220px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+        .category-label {
+            position: absolute;
+            top: 0.75rem;
+            left: 0.75rem;
+            background: rgba(13,110,253,0.85);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: .35rem 1rem;
+            border-radius: 0.5rem 0.5rem 0.5rem 0;
+            z-index: 2;
+            box-shadow: 0 0.1rem 0.5rem rgba(13,110,253,0.08);
+            letter-spacing: 0.5px;
+        }
+        .price-tag {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #198754;
+        }
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+        .filter-bar {
+            background: #f1f3f6;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body class="bg-light">
-<!-- Navigacija -->
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<!-- Glavni sadržaj -->
 <div class="content">
-<main class="container my-5">
-    <div class="row g-4">
-        <div class="col-12">
-            <h2 class="mb-4"><i class="fas fa-star me-2"></i>Naši proizvodi</h2>
-        </div>
-
-        <div class="row mb-4">
+    <main class="container my-5">
+        <div class="row g-4">
             <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filtriraj po kategoriji</h5>
+                <h2 class="mb-4"><i class="fas fa-star me-2"></i>Naši proizvodi</h2>
+            </div>
+
+            <!-- Filter bar -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="filter-bar shadow-sm">
+                        <h5 class="mb-3">
+                            <i class="fas fa-filter me-2"></i>
+                            Filtriraj po kategoriji
+                        </h5>
                         <div class="d-flex flex-wrap gap-2">
                             <a th:href="@{/}" class="btn btn-outline-primary"
                                th:classappend="${selectedCategoryId == null} ? 'active'">
@@ -41,54 +81,58 @@
                                th:href="@{/(categoryId=${category.id})}"
                                class="btn btn-outline-primary"
                                th:classappend="${selectedCategoryId != null && selectedCategoryId == category.id} ? 'active'">
+                                <i class="fas fa-tag me-1"></i>
                                 <span th:text="${category.name}"></span>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row" th:if="${products.empty}">
-            <div class="col-12">
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Nema proizvoda u odabranoj kategoriji.
+            <div class="row" th:if="${products.empty}">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Nema proizvoda u odabranoj kategoriji.
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div th:each="product : ${products}" class="col-12 col-md-6 col-lg-4 col-xl-3">
-            <div class="card h-100 product-card shadow-sm">
-                <img th:src="${product.imageUrl != null} ? @{${product.imageUrl}} : @{/images/placeholder.png}"
-                     alt="Slika proizvoda">
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title" th:text="${product.name}"></h5>
-                    <p class="card-text text-muted" th:text="${product.description}"></p>
-
-                    <div class="mt-auto">
-                        <p class="h4 text-primary" th:text="${'€ ' + #numbers.formatDecimal(product.price, 1, 2)}"></p>
-
-                        <div class="d-grid gap-2">
-                            <a th:href="@{/products/{id}(id=${product.id})}"
-                               class="btn btn-outline-primary">
-                                <i class="fas fa-info-circle me-2"></i>Detalji
-                            </a>
-
-                            <button class="btn btn-success"
-                                    th:onclick="'addToCart(' + ${product.id} + ')'">
-                                <i class="fas fa-cart-plus me-2"></i>Dodaj u košaricu
-                            </button>
+            <div class="row g-4">
+                <div th:each="product : ${products}" class="col-12 col-md-6 col-lg-4 col-xl-3 d-flex">
+                    <div class="card product-card flex-fill position-relative">
+                        <!-- Kategorija badge na vrhu slike -->
+                        <div class="category-label">
+                            <i class="fas fa-tag me-1"></i>
+                            <span th:text="${product.categoryName}"></span>
+                        </div>
+                        <img th:src="${(product.imageUrl != null and product.imageUrl != '')} ? ${product.imageUrl} : @{/images/placeholder.jpg}"
+                             class="product-img card-img-top"
+                             alt="Slika proizvoda"/>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mt-2 mb-1" th:text="${product.name}"></h5>
+                            <p class="card-text text-muted mb-2" th:text="${product.description}"></p>
+                            <div class="mt-auto">
+                                <p class="price-tag mb-3" th:text="${'€ ' + #numbers.formatDecimal(product.price, 1, 2)}"></p>
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{/products/{id}(id=${product.id})}"
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-info-circle me-2"></i>Detalji
+                                    </a>
+                                    <button class="btn btn-success"
+                                            th:onclick="'addToCart(' + ${product.id} + ')'">
+                                        <i class="fas fa-cart-plus me-2"></i>Dodaj u košaricu
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 </div>
 
-<!-- Cart skripta -->
 <script>
     function addToCart(productId) {
         fetch('/cart/add', {
@@ -108,23 +152,23 @@
 
                     return fetch('/cart/size');
                 }
-                    throw new Error('Greška');
-                }).then(response => response.json())
-                    .then(cartSize => {
-                        const cartLink = document.querySelector('a[href="/cart"]');
-                        let badge = cartLink.querySelector('.badge');
+                throw new Error('Greška');
+            }).then(response => response.json())
+            .then(cartSize => {
+                const cartLink = document.querySelector('a[href="/cart"]');
+                let badge = cartLink.querySelector('.badge');
 
-                        if (cartSize > 0) {
-                            if (!badge) {
-                                badge = document.createElement('span');
-                                badge.className = 'badge bg-danger ms-1';
-                                cartLink.appendChild(badge);
-                            }
-                            badge.textContent = cartSize;
-                        } else if (badge) {
-                            badge.remove();
-                        }
-                    })
+                if (cartSize > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'badge bg-danger ms-1';
+                        cartLink.appendChild(badge);
+                    }
+                    badge.textContent = cartSize;
+                } else if (badge) {
+                    badge.remove();
+                }
+            })
             .catch(error => {
                 Swal.fire({
                     icon: 'error',
@@ -134,12 +178,7 @@
             });
     }
 </script>
-<!-- Footer -->
 <div th:replace="~{fragments/footer :: footer}"></div>
-
-<!-- Skripte -->
-
 <div th:replace="~{fragments/navbar :: scripts}"></div>
-
 </body>
 </html>

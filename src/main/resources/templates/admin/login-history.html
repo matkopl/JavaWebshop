@@ -74,6 +74,7 @@
                             <th><i class="fas fa-user table-icon"></i>Korisnik</th>
                             <th><i class="fas fa-clock table-icon"></i>Vrijeme prijave</th>
                             <th><i class="fas fa-network-wired table-icon"></i>IP adresa</th>
+                            <th><i class="fas fa-shield-alt table-icon"></i>Status</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -81,6 +82,14 @@
                             <td th:text="${entry.username}"></td>
                             <td th:text="${#temporals.format(entry.loginTime, 'dd.MM.yyyy. HH:mm')}"></td>
                             <td th:text="${entry.ipAddress}"></td>
+                            <td>
+                                <span th:if="${entry.status == 'SUCCESS'}" class="badge bg-success">
+                                    <i class="fas fa-check-circle me-1"></i>Uspješno
+                                </span>
+                                <span th:if="${entry.status == 'FAILURE'}" class="badge bg-danger">
+                                    <i class="fas fa-times-circle me-1"></i>Neuspješno
+                                </span>
+                            </td>
                         </tr>
                         </tbody>
                     </table>

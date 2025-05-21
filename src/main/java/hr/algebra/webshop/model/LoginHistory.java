@@ -20,4 +20,5 @@ public class LoginHistory {
     private String username;
     private LocalDateTime loginTime;
     private String ipAddress;
+    private String status;
 }

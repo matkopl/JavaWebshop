@@ -5,7 +5,6 @@ import hr.algebra.webshop.dto.ProductDto;
 import hr.algebra.webshop.service.CartService;
 import hr.algebra.webshop.service.CategoryService;
 import hr.algebra.webshop.service.ProductService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

@@ -1,8 +1,10 @@
 package hr.algebra.webshop.controller;
 
 import hr.algebra.webshop.dto.LoginHistoryDto;
+import hr.algebra.webshop.dto.OrderDto;
 import hr.algebra.webshop.service.CategoryService;
 import hr.algebra.webshop.service.LoginHistoryService;
+import hr.algebra.webshop.service.OrderService;
 import hr.algebra.webshop.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,11 +23,22 @@ import java.util.List;
 public class AdminController {
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final OrderService orderService;
     private final LoginHistoryService loginHistoryService;
 
     @GetMapping("/admin")
     public String adminPanel(Model model) {
         return "admin/admin";
+    }
+
+    @GetMapping("/orders")
+    public String getAllOrders (@RequestParam(required = false) String username,
+                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end,
+                                Model model) {
+        List<OrderDto> orders = orderService.getFilteredOrders(username, start, end);
+        model.addAttribute("orders", orders);
+        return "admin/orders";
     }
 
     @GetMapping("/login-history")
