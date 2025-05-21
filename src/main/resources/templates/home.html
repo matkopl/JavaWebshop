@@ -13,29 +13,36 @@
             overflow: hidden;
             box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.07);
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            background: #fff;
         }
         .product-card:hover {
             transform: translateY(-7px) scale(1.01);
-            box-shadow: 0 0.5rem 2rem rgba(0,0,0,0.12);
+            box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.15);
         }
         .product-img {
             height: 220px;
             object-fit: cover;
             background: #f8f9fa;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
         }
         .category-label {
             position: absolute;
-            top: 0.75rem;
-            left: 0.75rem;
-            background: rgba(13,110,253,0.85);
+            top: 1rem;
+            right: 1rem;
+            background: #0d6efd;
             color: #fff;
             font-weight: 600;
-            font-size: 0.95rem;
-            padding: .35rem 1rem;
-            border-radius: 0.5rem 0.5rem 0.5rem 0;
+            font-size: 0.97rem;
+            padding: .35rem 1.1rem;
+            border-radius: 1.5rem;
             z-index: 2;
-            box-shadow: 0 0.1rem 0.5rem rgba(13,110,253,0.08);
+            box-shadow: 0 0.1rem 0.5rem rgba(13,110,253,0.09);
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .price-tag {
             font-size: 1.3rem;
@@ -49,8 +56,11 @@
         .filter-bar {
             background: #f1f3f6;
             border-radius: 0.5rem;
-            padding: 1.25rem;
+            padding: 1.25rem 1rem;
             margin-bottom: 2rem;
+        }
+        .filter-bar .btn {
+            min-width: 130px;
         }
     </style>
 </head>
@@ -100,10 +110,10 @@
 
             <div class="row g-4">
                 <div th:each="product : ${products}" class="col-12 col-md-6 col-lg-4 col-xl-3 d-flex">
-                    <div class="card product-card flex-fill position-relative">
-                        <!-- Kategorija badge na vrhu slike -->
+                    <div class="card product-card flex-fill">
+                        <!-- Jasno istaknuta kategorija na badgeu u gornjem desnom kutu -->
                         <div class="category-label">
-                            <i class="fas fa-tag me-1"></i>
+                            <i class="fas fa-tag"></i>
                             <span th:text="${product.categoryName}"></span>
                         </div>
                         <img th:src="${(product.imageUrl != null and product.imageUrl != '')} ? ${product.imageUrl} : @{/images/placeholder.jpg}"

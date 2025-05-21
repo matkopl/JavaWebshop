@@ -19,13 +19,15 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                        .requestMatchers("/products/*").permitAll()
                         .requestMatchers("/admin/**", "/categories/**", "/products/**").hasRole("ADMIN")
                         .requestMatchers("/cart/checkout", "/orders/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(
                                 "/", "/home",
                                 "/cart/**",
                                 "/auth/**",
-                                "/payment/**"
+                                "/payment/**",
+                                "/images/**"
                         ).permitAll()
 
                         .anyRequest().authenticated()

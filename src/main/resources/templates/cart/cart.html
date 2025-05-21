@@ -45,7 +45,7 @@
                 <div class="card-body">
                     <div class="row align-items-center">
                         <div class="col-md-2">
-                            <img th:src="${item.product.imageUrl != null} ? @{${item.product.imageUrl}} : @{/images/placeholder.png}"
+                            <img th:src="${(item.getProduct().imageUrl != null and item.getProduct().imageUrl != '')} ? ${item.getProduct().imageUrl} : @{/images/placeholder.jpg}"
                                  alt="Slika proizvoda"
                                  class="img-fluid rounded"
                                  style="max-height: 100px;">
