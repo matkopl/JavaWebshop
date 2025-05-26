@@ -48,7 +48,7 @@ public class CategoryController {
                                  RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            return "category-edit";
+            return "category/category-edit";
         }
 
         try {

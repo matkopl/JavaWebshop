@@ -8,6 +8,7 @@ import hr.algebra.webshop.service.CartService;
 import hr.algebra.webshop.service.OrderService;
 import hr.algebra.webshop.service.PaypalService;
 import hr.algebra.webshop.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,17 +31,23 @@ public class PaypalController {
 
     @PostMapping("/create")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> createPayment(Principal principal) {
+    public ResponseEntity<Map<String, String>> createPayment(Principal principal, HttpServletRequest request) {
         Map<String, String> response = new HashMap<>();
         try {
             User user = userService.findByUsername(principal.getName());
             double total = orderService.calculateCartTotal();
 
+            String baseUrl = request.getScheme() + "://" + request.getServerName()
+                    + (request.getServerPort() == 80 || request.getServerPort() == 443 ? "" : ":" + request.getServerPort());
+
+            String successUrl = baseUrl + "/payment/complete";
+            String cancelUrl = baseUrl + "/payment/cancel";
+
             Payment payment = paypalService.createPayment(
                     total,
                     "EUR",
-                    "http://localhost:8080/payment/complete",
-                    "http://localhost:8080/payment/cancel"
+                    successUrl,
+                    cancelUrl
             );
 
             response.put("id", payment.getId());
