@@ -17,10 +17,15 @@ public class BlockedIpFilter implements Filter {
     private final BlockedIpRepository blockedIpRepository;
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
+
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-        String ip = httpRequest.getRemoteAddr();
+
+        String ip = getClientIpAddress(httpRequest);
+
         logger.info("Provjera IP adrese: {}", ip);
+
         if (blockedIpRepository.existsByIpAddress(ip)) {
             logger.warn("Blokiran pristup za IP adresu: {}", ip);
             ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_FORBIDDEN, "Pristup zabranjen");
@@ -28,4 +33,13 @@ public class BlockedIpFilter implements Filter {
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }
+
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader != null && !xfHeader.isEmpty()) {
+            return xfHeader.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+
 }
