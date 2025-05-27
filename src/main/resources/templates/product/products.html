@@ -93,8 +93,7 @@
                             <i class="fas fa-edit me-1"></i>Uredi
                         </a>
                         <a th:href="@{'/products/delete/' + ${product.id}}"
-                           class="btn btn-outline-danger btn-sm"
-                           onclick="return confirmDelete(event)">
+                           class="btn btn-outline-danger btn-sm">
                             <i class="fas fa-trash me-1"></i>Obriši
                         </a>
                     </div>
@@ -132,10 +131,3 @@
     }
     /*]]>*/
 </script>
-<script>
-    function confirmDelete(event) {
-        event.preventDefault();
-        const url = event.currentTarget.href;
-
-        Swal.fire({
-            title: 'Je
